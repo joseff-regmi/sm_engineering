@@ -1,4 +1,4 @@
-from os import error
+from os import close, error
 from sqlite3.dbapi2 import Connection, Cursor, connect
 import sys, os.path
 from types import ClassMethodDescriptorType
@@ -26,6 +26,10 @@ from ui_btransactions import Ui_Form as T_ion
 from ui_ladger import Ui_Form as L_ger
 from ui_dtransactions import Ui_Form as Dt_ion
 from ui_tabs import Ui_Form as ui_tabs
+import time
+
+
+
 
 class Tabs(QWidget):
     def __init__(self):
@@ -265,7 +269,6 @@ class PassChan(QWidget):
         self.pcform = QWidget()
         self.uipc = P_Chan()
         self.uipc.setupUi(self.pcform)
-        self.pcform.setWindowFlag(Qt.FramelessWindowHint)
         self.pcform.show()
         self.uipc.login_btn_3.clicked.connect(self.updatingpassword)
         self.uipc.login_btn_2.clicked.connect(self.closing)
@@ -481,7 +484,7 @@ class BankEntryWindow(QWidget):
         self.bform.show()
         self.uif.find_bank_btn.setToolTip("Find Bank Data")
         self.uif.pushButton.clicked.connect(self.auto_initial_p)
-        self.uif.pushButton.clicked.connect(self.insert_bank_information)
+        self.uif.pushButton.clicked.connect(self.saveEvent)
         self.uif.add_bank.clicked.connect(self.show_bank_account)
         self.uif.bank_name.textActivated.connect(self.show_branch_name)
         self.uif.brnach_name.textActivated.connect(self.uif.provience.setFocus)
@@ -505,6 +508,11 @@ class BankEntryWindow(QWidget):
         self.uif.binitial_payment.returnPressed.connect(self.uif.bfinal_payment.setFocus)
         self.uif.bfinal_payment.returnPressed.connect(self.uif.bdew_balance.setFocus) 
         self.uif.bdew_balance.returnPressed.connect(self.uif.pushButton.setFocus)
+
+    
+
+
+
         conn = sqlite3.connect("sm.db")
         cur = conn.cursor()
         result = list(cur.execute(""" SELECT DISTINCT bank FROM Banks """))
@@ -518,10 +526,66 @@ class BankEntryWindow(QWidget):
         self.main_win1 = MainWindow()
         self.main_win1.ui.actionExit_2.triggered.connect(self.closebank)
 
+    def clearing(self):
+        self.uif.pushButton.clicked.connect(self.uif.bfile_code.clear)
+        self.uif.pushButton.clicked.connect(self.uif.bclient_name.clear)
+        self.uif.pushButton.clicked.connect(self.uif.bcontactt_no.clear)
+        self.uif.pushButton.clicked.connect(self.uif.baddress.clear)
+        self.uif.pushButton.clicked.connect(self.uif.sv_bd.clear)
+        self.uif.pushButton.clicked.connect(self.uif.sv_mm.clear)
+        self.uif.pushButton.clicked.connect(self.uif.sv_yy.clear)
+        self.uif.pushButton.clicked.connect(self.uif.id_dd.clear)
+        self.uif.pushButton.clicked.connect(self.uif.id_mm.clear)
+        self.uif.pushButton.clicked.connect(self.uif.id_yy.clear)
+        self.uif.pushButton.clicked.connect(self.uif.fd_dd.clear)
+        self.uif.pushButton.clicked.connect(self.uif.fd_mm.clear)
+        self.uif.pushButton.clicked.connect(self.uif.fd_yy.clear)
+        self.uif.pushButton.clicked.connect(self.uif.remarks_bank.clear)
+        self.uif.pushButton.clicked.connect(self.uif.bfmv.clear)
+        self.uif.pushButton.clicked.connect(self.uif.bcharges.clear)
+        self.uif.pushButton.clicked.connect(self.uif.binitial_payment.clear)
+        self.uif.pushButton.clicked.connect(self.uif.bfinal_payment.clear)
+        self.uif.pushButton.clicked.connect(self.uif.bdew_balance.clear)
+
+    def saveEvent(self):
+        save = QMessageBox()
+        save.setWindowFlag(Qt.WindowStaysOnTopHint)
+        save.setText("You sure?")
+        save.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
+        save = save.exec_()
+
+        if save == QMessageBox.Yes:
+            self.insert_bank_information()
+            self.uif.bfile_code.clear
+            self.uif.bclient_name.clear
+            self.uif.bcontactt_no.clear
+            self.uif.baddress.clear
+            self.uif.sv_bd.clear
+            self.uif.sv_mm.clear
+            self.uif.sv_yy.clear
+            self.uif.id_dd.clear
+            self.uif.id_mm.clear
+            self.uif.id_yy.clear
+            self.uif.fd_dd.clear
+            self.uif.fd_mm.clear
+            self.uif.fd_yy.clear
+            self.uif.remarks_bank.clear
+            self.uif.bfmv.clear
+            self.uif.bcharges.clear
+            self.uif.binitial_payment.clear
+            self.uif.bfinal_payment.clear
+            self.uif.bdew_balance.clear
+            
+
+        else:
+            self.IgnoreMask
+
     def auto_initial_p(self):
+
         initial_payment = self.uif.binitial_payment.text()
         final_payment = self.uif.bfinal_payment.text()
         charges = self.uif.bcharges.text() 
+
 
         if initial_payment == '' and final_payment != '' :
             self.uif.binitial_payment.setText(str(0))
@@ -539,6 +603,7 @@ class BankEntryWindow(QWidget):
             self.uif.bdew_balance.setText(str(charges))
 
         else:
+        
             dew_blc = float(charges) - float(initial_payment) - float(final_payment)
             self.uif.bdew_balance.setText(str(dew_blc))
     
@@ -614,6 +679,7 @@ class BankEntryWindow(QWidget):
 
 
     def insert_bank_information(self):
+
         conn = sqlite3.connect("sm.db")
         cur = conn.cursor()
         # cur.execute("""CREATE TABLE "Bankinfo" (
@@ -664,6 +730,9 @@ class BankEntryWindow(QWidget):
         conn.commit()
         conn.close()
 
+         
+
+
 
     def show_bank_account(self):
         self.dispaly4 = AccountForm()
@@ -674,11 +743,13 @@ class DesignEntryWindow(QWidget):
         super(QWidget, self).__init__()
         self.dform = QWidget()
         self.dform.setWindowFlag(Qt.WindowStaysOnTopHint)
-        # self.dform.setWindowFlag(Qt.FramelessWindowHint)
         self.uid = D_Form()
         self.uid.setupUi(self.dform)
         self.dform.show()
         self.uid.dcalcle_btn.clicked.connect(self.designsave)
+
+
+        
 
     def designingclose(self):
         self.dform.close()
@@ -743,7 +814,6 @@ class MainWindow(QMainWindow):
         self.ui.actionAll_2.triggered.connect(self.statement_form)
         self.ui.back_search_btn.clicked.connect(self.backtohomepage)
         self.ui.back_search_btn_2.clicked.connect(self.backtohomepage)
-        self.ui.pushButton.clicked.connect(self.animation)
         self.ui.actionBanking.triggered.connect(self.show_popup)
         self.ui.actionBanking_Sector_5.triggered.connect(self.show_banking_tform)
         self.ui.actionDesigning_Sector_7.triggered.connect(self.show_designing_tform)
@@ -784,9 +854,6 @@ class MainWindow(QMainWindow):
         self.dispaly6 = TreeView()
         self.dispaly6.close()
 
-    
-    def animation(self):
-        UIFunctions.frame_menu(self, 300, True)
 
 
     def backtohomepage(self):
